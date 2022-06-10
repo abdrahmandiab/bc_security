@@ -7,11 +7,6 @@ contract EHR {
     uint256 public visitCount;
     uint256 public patientCount;
 
-    struct Patient {
-        string info;
-        string visits;
-    }
-
     function addPatient(bytes memory _patientHash) public {
         patientCount++;
         Enc_Patients[patientCount] = _patientHash;

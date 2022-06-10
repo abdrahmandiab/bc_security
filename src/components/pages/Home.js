@@ -2,9 +2,6 @@ import React, { useEffect, useState } from 'react';
 import { Container, Button } from 'react-bootstrap';
 import axios from 'axios';
 
-
-
-
 const aesPassword="Secret Passphrase"
 
 
@@ -62,13 +59,7 @@ function Home() {
     // const ex=await window.crypto.subtle.exportKey("jwk",key.publicKey)
     // console.log("EXPORT: ",ex)
 
-
     // await window.crypto.subtle.importKey('jwk',)
-
-
-
-
-
   }
 
 
@@ -87,14 +78,6 @@ function Home() {
     const signed=await window.crypto.subtle.sign({ "name": "RSASSA-PKCS1-v1_5" },priv,buffer)
     console.log("SIGNED")
     console.log(signed)
-
-
-
-
-
-
-
-
 
 
     const verified=await window.crypto.subtle.verify({ "name": "RSASSA-PKCS1-v1_5" },pub,signed,buffer)
@@ -135,7 +118,6 @@ function Home() {
         {/* Get visits for patientid (take patientid) */}
 
         
-      
       </div> 
       <div
         style={{
