@@ -3,28 +3,6 @@ import { Container, Button } from 'react-bootstrap';
 import axios from 'axios';
 
 
-const privateKey=`-----BEGIN RSA PRIVATE KEY-----
-MIICXQIBAAKBgQDWSRyaW4S4VxbS0NrfgU8VTftsrFdK+rc3RzP/0eapp4Lg2/YL
-CnQuxBSKX9Ftq5O5J40Sjjjy6twASUKvVpuqthL/AEEJ384qdYwp4ggYmf2pFjaM
-15M04qWHe2XUTtThvUhFlJCYoGzQ4/I8Fm3J7LQi/bRscJiEBHp1Kh439wIDAQAB
-AoGBAK7jnOSeLQQGkCofK4OfFdxdeQaI4fXgCgijpFz2AzwT6016OKVqMsi4X8tP
-yK2pizdigFDUosYfyM6y/Cn+layPXXEjNtJtxzL+gfdQpzZGA7hvuaXNwodqJkTe
-mA0yz/q36Iyb5kzqZYDpsyzxbyBESm8nGP6PWNvs3Zy3INyBAkEA9/VdmI6l6mKm
-kLxJm/Ycc+tOMFrHwfpQTZDLy+/CtRLXtts7zaF0cCrFMphWZbmQTq8IfN4+59sA
-ZXhQgerTIwJBAN08LsPIMCuDtcuYGXcCtnngbwV5pabm+kURcermgVo2OD2L4KIp
-rmiH+9hPTDS+P6aLomv36/GKOsSjmaU5zx0CQFIUOL1NSwLBUR3MFhm4aEa+94zu
-H/3IHFjwu2VwomVKLXnsLGmvLloK7mgHIWJfALPrIMYk03HwfrsYDp5S2z0CQG2e
-uWlHEx8slvK3fb6reHExVLF40iy9/Dom57RF3MgvX3SXj4mqb4HaB17qA8+KiQ1j
-2On4oU9Ad9ghXCszVr0CQQC4S6yCYOuxtIvP0IlhFPZwcss3L8yvbeBCnK6imkPn
-43gGhUQUOtZE0CcGh7hRjwWza+IakpC+Z50ZpoTSCL47
------END RSA PRIVATE KEY-----`
-
-const publicKey=`-----BEGIN PUBLIC KEY-----
-MIGfMA0GCSqGSIb3DQEBAQUAA4GNADCBiQKBgQDWSRyaW4S4VxbS0NrfgU8VTfts
-rFdK+rc3RzP/0eapp4Lg2/YLCnQuxBSKX9Ftq5O5J40Sjjjy6twASUKvVpuqthL/
-AEEJ384qdYwp4ggYmf2pFjaM15M04qWHe2XUTtThvUhFlJCYoGzQ4/I8Fm3J7LQi
-/bRscJiEBHp1Kh439wIDAQAB
------END PUBLIC KEY-----`
 
 
 const aesPassword="Secret Passphrase"
@@ -42,23 +20,60 @@ function Home() {
   // Patient data
   const [name,setName]=useState("")
   const [age,setAge]=useState("")
+  const [publicKey,setPublicKey]=useState("")
+  const [privateKey,setPrivateKey]=useState("")
+  let priv=""
+  let pub=""
 
   const [searchTerm, setSearchTerm] = useState('');
   const [patientList, setPatientList] = useState([]);
   const [loading, setLoading] = useState(true);
   const [sorting, setSorting] = useState(true); // True is ascending, False is Descending
   useEffect(() => {
-    axios.get('')
-      .then(({ data }) => {
-        setPatientList(data.sort());
-        setLoading(false);
-      })
-      .catch((err) => console.log(err.response.data));
+    // axios.get('')
+    //   .then(({ data }) => {
+    //     setPatientList(data.sort());
+    //     setLoading(false);
+    //   })
+    //   .catch((err) => console.log(err.response.data));
   }, []);
+
+  const generateKeys=async()=>{
+    const options={
+      name:"RSASSA-PKCS1-v1_5",
+      modulusLength:4096,
+      publicExponent:new Uint8Array([0x01, 0x00, 0x01]),
+      hash:"SHA-512"
+    }
+    let key=""
+    await window.crypto.subtle.generateKey(options, true,  ["sign","verify"] )
+    .then((res)=>{
+      console.log("KEYS")
+      console.log(res)
+      setPrivateKey(res.privateKey)
+      setPublicKey(res.publicKey)
+      priv=res.privateKey
+      pub=res.publicKey
+    }).catch((err)=>{
+      console.log(err)
+    })
+    console.log("----")
+    //! NEED TO SAVE KEY 
+    // const ex=await window.crypto.subtle.exportKey("jwk",key.publicKey)
+    // console.log("EXPORT: ",ex)
+
+
+    // await window.crypto.subtle.importKey('jwk',)
+
+
+
+
+
+  }
 
 
   const submit=async()=>{
-
+    await generateKeys()
     const json={
       name:name
     }
@@ -66,12 +81,30 @@ function Home() {
     const string=JSON.stringify(json)
     const encrypted= await window.CryptoJS.AES.encrypt(string,aesPassword)
 
-    console.log(encrypted)
+    console.log(await encrypted.toString(window.CryptoJS.enc.Utf8))
+    console.log(privateKey)
+    const buffer=new ArrayBuffer(encrypted);
+    const signed=await window.crypto.subtle.sign({ "name": "RSASSA-PKCS1-v1_5" },priv,buffer)
+    console.log("SIGNED")
+    console.log(signed)
 
-    const decrypted=await window.CryptoJS.AES.decrypt(encrypted,aesPassword)
-    console.log(decrypted)
-    const js=JSON.parse(decrypted)
-    console.log(js)
+
+
+
+
+
+
+
+
+
+    const verified=await window.crypto.subtle.verify({ "name": "RSASSA-PKCS1-v1_5" },pub,signed,buffer)
+    console.log("VERIFICATION")
+    console.log(verified)
+
+
+    // const decrypted=await window.CryptoJS.AES.decrypt(encrypted,aesPassword).toString(window.CryptoJS.enc.Utf8)
+    // const js=JSON.parse(decrypted)
+    // console.log(js)
   }
 
   return (
