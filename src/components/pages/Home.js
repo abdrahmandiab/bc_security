@@ -1,7 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { Container, Button } from 'react-bootstrap';
 import axios from 'axios';
-import Loading from 'react-loading';
 
 function Home() {
   let style2 = {
@@ -49,14 +48,7 @@ function Home() {
         {/* Get visits for patientid (take patientid) */}
 
         
-        {/* <input
-          style={style2}
-          type='text'
-          placeholder='Search...'
-          onChange={(event) => {
-            setSearchTerm(event.target.value);
-          }}
-        />*/}
+      
       </div> 
       <div
         style={{
