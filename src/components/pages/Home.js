@@ -17,6 +17,8 @@ function Home() {
   // Patient data
   const [name,setName]=useState("")
   const [age,setAge]=useState("")
+  const [blood,setBlood]=useState("")
+
   const [publicKey,setPublicKey]=useState("")
   const [privateKey,setPrivateKey]=useState("")
   let priv=""
@@ -106,6 +108,8 @@ function Home() {
           <input name='name' value={name} onChange={(value)=>setName(value.target.value)}/>
           age
           <input name='age' value={age} onChange={(value)=>setAge(value.target.value)}/>
+          5effetDam
+          <input name='5effed Dam' value={blood} onChange={(value)=>setBlood(value.target.value)}/>
           <button type='button' onClick={submit}>  add record </button>
         </div>
         </div>
